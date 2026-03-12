@@ -22,7 +22,7 @@ public class CollectionScheduler {
     → trouve Consumer
     → l'injecte ✅
 */
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "*/10 * * * * *")
     /*"Déclenche quand seconde = 0 ET minute = 0, peu importe le reste"
 
 Donc toutes les heures pile.*/

@@ -27,6 +27,7 @@ public class RestConsumer implements IDataSourceConsumer {
 
 
         Map<String, Object> response = restTemplate.getForObject(API_URL, Map.class);
+        log.info("Réponse : {}", response);
 
         if (response == null || !response.containsKey("articles")) {
             return List.of();

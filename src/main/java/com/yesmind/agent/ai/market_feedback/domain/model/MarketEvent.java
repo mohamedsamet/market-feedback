@@ -17,5 +17,7 @@ public class MarketEvent {
     private String sourceUrl;
     private String sourceType;
     private LocalDateTime collectedAt;
+    private LocalDateTime creationDate;
+
 
 }

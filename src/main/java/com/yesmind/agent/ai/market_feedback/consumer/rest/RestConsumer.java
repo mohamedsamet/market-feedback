@@ -42,6 +42,7 @@ public class RestConsumer implements IDataSourceConsumer {
                         (String) article.get("description"),
                         (String) article.get("url"),
                         "REST_API",
+                        LocalDateTime.now(),
                         LocalDateTime.now()
                 ))
                 .toList();

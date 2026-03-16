@@ -5,8 +5,10 @@ import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+@RequiredArgsConstructor
 
 @Component
 public class ScrapingConsumer implements IDataSourceConsumer {

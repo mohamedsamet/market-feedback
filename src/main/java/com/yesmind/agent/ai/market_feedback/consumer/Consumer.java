@@ -4,41 +4,40 @@ import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
+
 public class Consumer implements IConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(Consumer.class);
 
     private final List<IDataSourceConsumer> sources;
     private final IRepository repository;
-    private final IPublisher publisher;
+    // private final IPublisher publisher;
 
-    public Consumer(List<IDataSourceConsumer> sources,
-                    IRepository repository,
-                    IPublisher publisher) {
-        this.sources = sources;
-        this.repository = repository;
-        this.publisher = publisher;
-    }
+
 
     @Override
     public void consume() {
-        for (IDataSourceConsumer source : sources) {
+        sources.forEach(this::collectFromSource);
+    }
+    //Pour chaque source dans la liste apelle la methode :collectFromSource
+    private void collectFromSource(IDataSourceConsumer source) {
+        log.info("Collecte depuis : {}", source.getSourceName());
+        List<MarketEvent> events = source.consume();
+        events.forEach(this::processEvent);
+        log.info("{} événements collectés depuis {}", events.size(), source.getSourceName());
+    }
+    //Stocke les articles récupéré de chaque source et Pour chaque article, appelle processEvent
+    @Transactional
+    public void processEvent(MarketEvent event) {
+        repository.save(event);
 
-            log.info("▶ Collecte depuis : {}", source.getSourceName());
-
-            List<MarketEvent> events = source.consume();
-
-            for (MarketEvent event : events) {
-                repository.save(event);
-                publisher.publish(event);
-            }
-
-            log.info("✅ {} événements collectés depuis {}",
-                    events.size(), source.getSourceName());
-        }
     }
 }

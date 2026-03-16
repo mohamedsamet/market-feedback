@@ -6,12 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import java.util.Map;
 import java.time.LocalDateTime;
+import com.yesmind.agent.ai.market_feedback.consumer.rest.news.NewsResponse;
+
 
 import java.util.List;
-import java.util.UUID;
-
+/*
+ Appelle l'API NewsAPI et récupère les articles .Au lieu de recevoir un Map, on reçoit directement un objet NewsResponse
+  qui contient une liste d'Article, chaque article est ensuite converti en MarketEvent.
+ */
 @Component
 public class RestConsumer implements IDataSourceConsumer {
 
@@ -26,23 +29,24 @@ public class RestConsumer implements IDataSourceConsumer {
         log.info("Appel REST API : {}", API_URL);
 
 
-        Map<String, Object> response = restTemplate.getForObject(API_URL, Map.class);
+        NewsResponse response = restTemplate.getForObject(API_URL, NewsResponse.class);
+        log.info("Réponse : {}", response);
 
-        if (response == null || !response.containsKey("articles")) {
+        if (response == null) {
             return List.of();
         }
 
-        List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
 
-        return articles.stream()
-                .map(article -> new MarketEvent(
-                        UUID.randomUUID().toString(),
-                        (String) article.get("title"),
-                        (String) article.get("description"),
-                        (String) article.get("url"),
-                        "REST_API",
-                        LocalDateTime.now()
-                ))
+        return response.getArticles().stream()
+                .map(article -> MarketEvent.builder()
+                        .title(article.getTitle())
+                        .content(article.getDescription())
+                        .sourceUrl(article.getUrl())
+                        .sourceType("REST_API")
+                        .collectedAt(LocalDateTime.now())
+                        .creationDate(LocalDateTime.now())
+                        .build()
+                )
                 .toList();
 
     }

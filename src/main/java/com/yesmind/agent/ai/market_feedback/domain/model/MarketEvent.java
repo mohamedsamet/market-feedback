@@ -18,7 +18,7 @@ public class MarketEvent {
     private String title;
     private String content;
     private String sourceUrl;
-    private String sourceType;
+    private SourceType sourceType;
     private LocalDateTime creationDate;
 
 

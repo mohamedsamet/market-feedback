@@ -1,6 +1,6 @@
-package com.yesmind.agent.ai.market_feedback.consumer.rest;
+package com.yesmind.agent.ai.market_feedback.adapter.consumer.rest;
 
-import com.yesmind.agent.ai.market_feedback.consumer.IDataSourceConsumer;
+import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Component
-public class RestConsumer implements IDataSourceConsumer {
+public class RestConsumer implements DataSourceConsumable {
 
     private static final Logger log = LoggerFactory.getLogger(RestConsumer.class);
     private final RestTemplate restTemplate = new RestTemplate();

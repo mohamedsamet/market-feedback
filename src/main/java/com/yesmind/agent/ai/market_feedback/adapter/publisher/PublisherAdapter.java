@@ -1,6 +1,7 @@
-package com.yesmind.agent.ai.market_feedback.consumer;
+package com.yesmind.agent.ai.market_feedback.adapter.publisher;
 
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
+import com.yesmind.agent.ai.market_feedback.port.publisher.IPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

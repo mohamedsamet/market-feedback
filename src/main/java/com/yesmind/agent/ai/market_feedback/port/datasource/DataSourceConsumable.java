@@ -1,9 +1,9 @@
-package com.yesmind.agent.ai.market_feedback.consumer;
+package com.yesmind.agent.ai.market_feedback.port.datasource;
 
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import java.util.List;
 
-public interface IDataSourceConsumer {
+public interface DataSourceConsumable {
 
     List<MarketEvent> consume();
 

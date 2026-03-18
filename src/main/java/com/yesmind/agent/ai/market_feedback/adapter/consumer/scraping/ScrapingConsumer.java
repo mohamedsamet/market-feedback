@@ -1,6 +1,6 @@
-package com.yesmind.agent.ai.market_feedback.consumer.scraping;
+package com.yesmind.agent.ai.market_feedback.adapter.consumer.scraping;
 
-import com.yesmind.agent.ai.market_feedback.consumer.IDataSourceConsumer;
+import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 
 @Component
-public class ScrapingConsumer implements IDataSourceConsumer {
+public class ScrapingConsumer implements DataSourceConsumable {
 
     private static final Logger log = LoggerFactory.getLogger(ScrapingConsumer.class);
 

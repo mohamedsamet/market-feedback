@@ -1,6 +1,6 @@
-package com.yesmind.agent.ai.market_feedback.consumer.scheduler;
+package com.yesmind.agent.ai.market_feedback.business.core.scheduler;
 
-import com.yesmind.agent.ai.market_feedback.consumer.IConsumer;
+import com.yesmind.agent.ai.market_feedback.port.core.Consumable;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ public class CollectionScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(CollectionScheduler.class);
 
-    private final IConsumer consumer;
+    private final Consumable consumer;
 
     @Scheduled(cron = "0 0 * * * *")
     public void trigger() {

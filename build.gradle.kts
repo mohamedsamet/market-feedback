@@ -30,6 +30,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-restclient")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-mongodb-test")

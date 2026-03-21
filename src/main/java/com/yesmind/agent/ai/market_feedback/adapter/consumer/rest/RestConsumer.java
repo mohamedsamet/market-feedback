@@ -1,5 +1,4 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.rest;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
@@ -12,6 +11,7 @@ import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 @Component
 @RequiredArgsConstructor
@@ -25,47 +25,21 @@ public class RestConsumer implements DataSourceConsumable {
     @Override
     public List<MarketEvent> consume() {
         List<MarketEvent> allEvents = new ArrayList<>();
-        for (String url : config.getUrls()) {
+        config.getUrls().forEach(url -> {
             log.info("Appel REST API : {}", url);
-
-            Object response = restTemplate.getForObject(url, Object.class);
-            if (response == null) {
-                log.warn("Aucune réponse depuis : {}", url);
-                continue;
-            }
-
-            log.info("✅ Réponse reçue depuis : {}", url);
-
-            //on a Transformé la réponse en JsonNode
-            JsonNode root = mapper.valueToTree(response);
-            JsonNode articles = root.get("articles");
-            if (articles != null && articles.isArray()) {
-
-                for (JsonNode node : articles) {
-
-                    MarketEvent event = new MarketEvent();
-
-
-                    event.setTitle(node.path("title").asText());
-                    event.setContent(node.path("description").asText());
-
-                    fillMissingFields(event, url);
-
-                    allEvents.add(event);
-                }
-            }
-        }
+            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url, Object.class)), MarketEvent.class);//transformer directement en market event
+            event.setSourceUrl(url);
+            event.setId(UUID.randomUUID().toString());
+            event.setCreationDate(LocalDateTime.now());
+            event.setSourceType(SourceType.REST); // ou RSS / Scraping
+            allEvents.add(event);
+            log.info(" MarketEvent créé depuis : {}", url);
+        });
 
         return allEvents;
     }
 
-    // Complète les champs manquants pour chaque événement
-    private void fillMissingFields(MarketEvent event, String url) {
-        if (event.getId() == null) event.setId(UUID.randomUUID().toString());
-        if (event.getSourceUrl() == null) event.setSourceUrl(url);
-        if (event.getSourceType() == null) event.setSourceType(SourceType.REST);
-        if (event.getCreationDate() == null) event.setCreationDate(LocalDateTime.now());
-    }
+
     @Override
     public String getSourceName() {
         return "REST_API";

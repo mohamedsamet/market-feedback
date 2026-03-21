@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 public class MarketEvent {
 
     private String id;
-    private String title;
     private String content;
     private String sourceUrl;
     private SourceType sourceType;

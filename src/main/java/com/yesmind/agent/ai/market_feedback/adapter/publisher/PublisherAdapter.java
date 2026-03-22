@@ -14,6 +14,6 @@ public class PublisherAdapter implements IPublisher {
     @Override
     public void publish(MarketEvent event) {
         // TODO : branchement Kafka plus tard
-        log.info("Publication : {}", event.getTitle());
+        log.info("Publication : {}", event.getSourceUrl());
     }
 }

@@ -1,28 +1,50 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.rss;
 
-import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
+import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
+import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class RssConsumer implements DataSourceConsumable {
     // s'engage à respecter le contrat IDataSourceConsumer. Donc il doit obligatoirement avoir consume() et getSourceName()
-
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final  RssConsumerConfig config;
+    private final XmlMapper xmlMapper;
     private static final Logger log = LoggerFactory.getLogger(RssConsumer.class);
-
     @Override
     public List<MarketEvent> consume() {
+        List<MarketEvent> allEvents = new ArrayList<>();
         log.info("Lecture du flux RSS...");
-        // TODO : logique RSS
-        return List.of();//retourne liste vide maintenat
+        config.getUrls().forEach(url -> {log.info("Appel flux RSS : {}", url);
+            String responseXml = restTemplate.getForObject(url, String.class);
+
+            MarketEvent event = xmlMapper.convertValue(Objects.requireNonNull(responseXml), MarketEvent.class);
+            event.setId(UUID.randomUUID().toString());
+            event.setSourceUrl(url);
+            event.setCreationDate(LocalDateTime.now());
+            event.setSourceType(SourceType.RSS);
+            allEvents.add(event);
+            log.info(" MarketEvent RSS créé depuis : {}", url);
+        });
+
+        return allEvents;
     }
+
 
     @Override
     public String getSourceName() {
         return "RSS";
-    }
-}
+    }}

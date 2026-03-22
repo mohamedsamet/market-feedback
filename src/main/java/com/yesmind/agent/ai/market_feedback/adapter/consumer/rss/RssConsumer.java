@@ -22,7 +22,7 @@ public class RssConsumer implements DataSourceConsumable {
     // s'engage à respecter le contrat IDataSourceConsumer. Donc il doit obligatoirement avoir consume() et getSourceName()
     private final RestTemplate restTemplate = new RestTemplate();
     private final  RssConsumerConfig config;
-    private final XmlMapper xmlMapper;
+    private final XmlMapper xmlMapper;//version XML de ObjectMapper
     private static final Logger log = LoggerFactory.getLogger(RssConsumer.class);
     @Override
     public List<MarketEvent> consume() {

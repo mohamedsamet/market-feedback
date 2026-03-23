@@ -21,30 +21,41 @@ import java.util.UUID;
 public class RssConsumer implements DataSourceConsumable {
     // s'engage à respecter le contrat IDataSourceConsumer. Donc il doit obligatoirement avoir consume() et getSourceName()
     private final RestTemplate restTemplate = new RestTemplate();
-    private final  RssConsumerConfig config;
+    private final RssConsumerConfig config;
     private final XmlMapper xmlMapper;//version XML de ObjectMapper
     private static final Logger log = LoggerFactory.getLogger(RssConsumer.class);
+
     @Override
     public List<MarketEvent> consume() {
         List<MarketEvent> allEvents = new ArrayList<>();
         log.info("Lecture du flux RSS...");
-        config.getUrls().forEach(url -> {log.info("Appel flux RSS : {}", url);
+        config.getUrls().forEach(url -> {
+            log.info("Appel flux RSS : {}", url);
             String responseXml = restTemplate.getForObject(url, String.class);
+            try {
+                Object content = xmlMapper.readValue(Objects.requireNonNull(responseXml), Object.class);
+                MarketEvent event = new MarketEvent();
+                event.setContent(content.toString());
+                event.setId(UUID.randomUUID().toString());
+                event.setSourceUrl(url);
+                event.setCreationDate(LocalDateTime.now());
+                event.setSourceType(SourceType.RSS);
+                allEvents.add(event);
+                log.info(" MarketEvent RSS créé depuis : {}", url);
+            } catch (Exception e) {
+                log.error("Erreur parsing RSS depuis {} : {}", url, e.getMessage());
 
-            MarketEvent event = xmlMapper.convertValue(Objects.requireNonNull(responseXml), MarketEvent.class);
-            event.setId(UUID.randomUUID().toString());
-            event.setSourceUrl(url);
-            event.setCreationDate(LocalDateTime.now());
-            event.setSourceType(SourceType.RSS);
-            allEvents.add(event);
-            log.info(" MarketEvent RSS créé depuis : {}", url);
+            }
         });
-
         return allEvents;
+
+    }
+        @Override
+        public String getSourceName () {
+            return "RSS";
+        }
     }
 
 
-    @Override
-    public String getSourceName() {
-        return "RSS";
-    }}
+
+

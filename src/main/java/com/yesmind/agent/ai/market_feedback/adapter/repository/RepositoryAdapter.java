@@ -14,6 +14,6 @@ public class RepositoryAdapter implements IRepository {
     @Override
     public void save(MarketEvent event) {
         // TODO : branchement BDD plus tard
-        log.info("Sauvegarde : {}", event.getTitle());
+        log.info("Sauvegarde : {}", event.getSourceUrl());
     }
 }

@@ -1,6 +1,7 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.rss;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.yesmind.agent.ai.market_feedback.adapter.DataSanitizer;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
 import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
@@ -34,8 +35,11 @@ public class RssConsumer implements DataSourceConsumable {
             String responseXml = restTemplate.getForObject(url, String.class);
             try {
                 Object content = xmlMapper.readValue(Objects.requireNonNull(responseXml), Object.class);
+                String safeContent = DataSanitizer.sanitizeHtml(content.toString());
+                System.out.println("=== Contenu nettoyé ===");
+                System.out.println(safeContent);
                 MarketEvent event = new MarketEvent();
-                event.setContent(content.toString());
+                event.setContent(safeContent);
                 event.setId(UUID.randomUUID().toString());
                 event.setSourceUrl(url);
                 event.setCreationDate(LocalDateTime.now());

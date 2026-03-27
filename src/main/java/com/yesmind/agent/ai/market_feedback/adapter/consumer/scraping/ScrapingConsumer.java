@@ -1,14 +1,16 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.scraping;
 
-import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
+import com.yesmind.agent.ai.market_feedback.adapter.DataSanitizer.DataSanitizer;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,7 @@ public class ScrapingConsumer implements DataSourceConsumable {
 
     private static final Logger log = LoggerFactory.getLogger(ScrapingConsumer.class);
     private final ScrapingConsumerConfig config;
+    private final DataSanitizer sanitizer;
     @Override
     public List<MarketEvent> consume() {
         List<MarketEvent> allEvents = new ArrayList<>();
@@ -31,7 +34,9 @@ public class ScrapingConsumer implements DataSourceConsumable {
             //Jsoup transforme le HTML → objet manipulable (Document)
 
                 String content = doc.select(config.getTags()).text();
-
+                String contentClean  = sanitizer.sanitize(content, "XML");
+                System.out.println("=== Contenu nettoyé ===");//pour tester le output
+                System.out.println(contentClean);
                 MarketEvent event = new MarketEvent();
                 event.setId(UUID.randomUUID().toString());
                 event.setContent(content);

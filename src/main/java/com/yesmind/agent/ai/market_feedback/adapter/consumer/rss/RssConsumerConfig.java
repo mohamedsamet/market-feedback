@@ -13,4 +13,5 @@ import java.util.List;
 public class RssConsumerConfig {
 
     private List<String> urls;
+    private String tags;
 }

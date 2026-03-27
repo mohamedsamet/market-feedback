@@ -30,7 +30,7 @@ public class ScrapingConsumer implements DataSourceConsumable {
                 Document doc = Jsoup.connect(url).get();
             //Jsoup transforme le HTML → objet manipulable (Document)
 
-                String content = doc.select("h1, h2, h3, p").text();
+                String content = doc.select(config.getTags()).text();
 
                 MarketEvent event = new MarketEvent();
                 event.setId(UUID.randomUUID().toString());

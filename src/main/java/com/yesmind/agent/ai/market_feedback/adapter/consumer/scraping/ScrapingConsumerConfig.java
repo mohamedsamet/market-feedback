@@ -14,4 +14,5 @@ import java.util.List;
 public class ScrapingConsumerConfig {
 
     private List<String> urls;
+    private String tags;
 }

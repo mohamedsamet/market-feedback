@@ -1,6 +1,6 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.rss;
-
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.yesmind.agent.ai.market_feedback.adapter.datasanitizer.DataSanitizer;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
 import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
@@ -9,13 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class RssConsumer implements DataSourceConsumable {
@@ -24,7 +22,7 @@ public class RssConsumer implements DataSourceConsumable {
     private final RssConsumerConfig config;
     private final XmlMapper xmlMapper;//version XML de ObjectMapper
     private static final Logger log = LoggerFactory.getLogger(RssConsumer.class);
-
+    DataSanitizer sanitizer = new DataSanitizer();
     @Override
     public List<MarketEvent> consume() {
         List<MarketEvent> allEvents = new ArrayList<>();
@@ -33,7 +31,10 @@ public class RssConsumer implements DataSourceConsumable {
             log.info("Appel flux RSS : {}", url);
             String responseXml = restTemplate.getForObject(url, String.class);
             try {
-                Object content = xmlMapper.readValue(Objects.requireNonNull(responseXml), Object.class);
+                String xmlClean  = sanitizer.sanitize(responseXml, "XML");
+                System.out.println("=== Contenu nettoyé ===");//pour tester le output
+                System.out.println(xmlClean);
+                Object content = xmlMapper.readValue(Objects.requireNonNull(xmlClean ), Object.class);
                 MarketEvent event = new MarketEvent();
                 event.setContent(content.toString());
                 event.setId(UUID.randomUUID().toString());
@@ -44,7 +45,6 @@ public class RssConsumer implements DataSourceConsumable {
                 log.info(" MarketEvent RSS créé depuis : {}", url);
             } catch (Exception e) {
                 log.error("Erreur parsing RSS depuis {} : {}", url, e.getMessage());
-
             }
         });
         return allEvents;

@@ -1,4 +1,5 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.rest;
+import com.yesmind.agent.ai.market_feedback.adapter.datasanitizer.DataSanitizer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;

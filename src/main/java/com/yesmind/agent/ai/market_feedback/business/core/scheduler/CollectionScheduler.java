@@ -15,7 +15,7 @@ public class CollectionScheduler {
 
     private final Consumable consumer;
 
-    @Scheduled(cron = "*/10 * * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void trigger() {
         log.info("Démarrage automatique de la collecte...");
         consumer.consume();

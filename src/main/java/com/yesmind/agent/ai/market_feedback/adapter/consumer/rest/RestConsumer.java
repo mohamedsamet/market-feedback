@@ -25,15 +25,19 @@ public class RestConsumer implements DataSourceConsumable {
     @Override
     public List<MarketEvent> consume() {
         List<MarketEvent> allEvents = new ArrayList<>();
-        config.getUrls().forEach(url -> {
-            log.info("Appel REST API : {}", url);
-            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url, Object.class)), MarketEvent.class);//transformer directement en market event
+        config.getRest().forEach(source -> {
+            if (!source.isEnabled()) {
+                log.info("⏭️ Source désactivée : {}", source.getDescription());
+                return;
+            }
+            String url = source.getUrl() + "&apiKey=" + source.getApiKey();
+            log.info("Appel REST API : {}", source.getDescription());            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url, Object.class)), MarketEvent.class);//transformer directement en market event
             event.setSourceUrl(url);
             event.setId(UUID.randomUUID().toString());
             event.setCreationDate(LocalDateTime.now());
             event.setSourceType(SourceType.REST); // ou RSS / Scraping
             allEvents.add(event);
-            log.info(" MarketEvent créé depuis : {}", url);
+            log.info("MarketEvent créé depuis : {}", source.getDescription());
         });
 
         return allEvents;

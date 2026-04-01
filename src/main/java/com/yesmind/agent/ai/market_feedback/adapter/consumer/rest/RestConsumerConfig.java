@@ -9,8 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "market.feedback.rest")
+@ConfigurationProperties(prefix = "market.feedback")
 public class RestConsumerConfig {
 
-    private List<String> urls;
+    private List<RestSourceConfig> rest;
 }

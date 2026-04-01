@@ -10,9 +10,9 @@ import java.util.List;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "market.feedback.scraping")
+@ConfigurationProperties(prefix = "market.feedback")
 public class ScrapingConsumerConfig {
 
-    private List<String> urls;
+    private List<ScrapingSourceConfig> scraping;
     private String tags;
 }

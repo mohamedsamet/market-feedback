@@ -9,8 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "market.feedback.rss")
+@ConfigurationProperties(prefix = "market.feedback")
 public class RssConsumerConfig {
 
-    private List<String> urls;
+    private List<RssSourceConfig> rss;
 }

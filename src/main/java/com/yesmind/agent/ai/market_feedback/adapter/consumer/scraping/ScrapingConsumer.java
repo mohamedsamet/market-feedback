@@ -23,14 +23,21 @@ public class ScrapingConsumer implements DataSourceConsumable {
     public List<MarketEvent> consume() {
         List<MarketEvent> allEvents = new ArrayList<>();
         log.info("Scraping en cours...");
-        config.getUrls().forEach(url -> {
+        config.getScraping().forEach(source -> {
+            if (!source.isEnabled()) {
+                log.info("⏭️ Source désactivée : {}", source.getDescription());
+                return;
+            }
+            String url = source.getUrl();
             try {
-                log.info("Scraping URL : {}", url);
+                log.info("Scraping URL : {}", source.getDescription());
 
-                Document doc = Jsoup.connect(url).get();
-            //Jsoup transforme le HTML → objet manipulable (Document)
+                Document doc = Jsoup.connect(url)
+                        .userAgent(source.getUserAgent())
+                        .timeout(source.getTimeout())
+                        .get();            //Jsoup transforme le HTML → objet manipulable (Document)
 
-                String content = doc.select(config.getTags()).text();
+                String content = doc.select(source.getTags()).text();
 
                 MarketEvent event = new MarketEvent();
                 event.setId(UUID.randomUUID().toString());
@@ -41,10 +48,10 @@ public class ScrapingConsumer implements DataSourceConsumable {
 
                 allEvents.add(event);
 
-                log.info(" MarketEvent SCRAPING créé depuis : {}", url);
+                log.info("MarketEvent SCRAPING créé depuis : {}", source.getDescription());
 
             } catch (Exception e) {
-                log.error("Erreur scraping depuis {} : {}", url, e.getMessage());
+                log.error("Erreur scraping depuis {} : {}", source.getDescription(), e.getMessage());
             }
         });
 

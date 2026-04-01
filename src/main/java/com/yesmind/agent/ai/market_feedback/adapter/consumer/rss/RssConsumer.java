@@ -29,8 +29,13 @@ public class RssConsumer implements DataSourceConsumable {
     public List<MarketEvent> consume() {
         List<MarketEvent> allEvents = new ArrayList<>();
         log.info("Lecture du flux RSS...");
-        config.getUrls().forEach(url -> {
-            log.info("Appel flux RSS : {}", url);
+        config.getRss().forEach(source -> {
+            if (!source.isEnabled()) {
+                log.info("⏭️ Source désactivée : {}", source.getDescription());
+                return;
+            }
+            String url = source.getUrl();
+            log.info("Appel flux RSS : {}", source.getDescription());
             String responseXml = restTemplate.getForObject(url, String.class);
             try {
                 Object content = xmlMapper.readValue(Objects.requireNonNull(responseXml), Object.class);
@@ -41,9 +46,9 @@ public class RssConsumer implements DataSourceConsumable {
                 event.setCreationDate(LocalDateTime.now());
                 event.setSourceType(SourceType.RSS);
                 allEvents.add(event);
-                log.info(" MarketEvent RSS créé depuis : {}", url);
+                log.info("MarketEvent RSS créé depuis : {}", source.getDescription());
             } catch (Exception e) {
-                log.error("Erreur parsing RSS depuis {} : {}", url, e.getMessage());
+                log.error("Erreur parsing RSS depuis {} : {}", source.getDescription(), e.getMessage());
 
             }
         });

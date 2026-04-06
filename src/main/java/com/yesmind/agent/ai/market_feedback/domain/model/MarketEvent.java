@@ -1,10 +1,7 @@
 package com.yesmind.agent.ai.market_feedback.domain.model;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.Setter;
-
 
 import java.time.LocalDateTime;
 @Builder

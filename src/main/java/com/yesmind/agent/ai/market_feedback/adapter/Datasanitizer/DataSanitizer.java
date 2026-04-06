@@ -1,5 +1,5 @@
 package com.yesmind.agent.ai.market_feedback.adapter.Datasanitizer;
-import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
+import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
 import com.yesmind.agent.ai.market_feedback.port.idatasanitizer.IDataSanitizer;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
@@ -13,7 +13,7 @@ public class DataSanitizer implements IDataSanitizer {
     private final PolicyFactory POLICY_XML;
 
     public DataSanitizer(
-            @Value("${market.feedback.scraping[0].tags}") String htmlTags,
+            @Value("${sanitizer.html.allowed-elements:p,br,strong,em,ul,ol,li,a}") String htmlTags,
             @Value("${market.feedback.rss.xml-tags}") String xmlTags
     ) {
         // HTML Policy
@@ -45,14 +45,16 @@ public class DataSanitizer implements IDataSanitizer {
     }
 
     @Override
-    public String sanitize(String data, String type) {
-       switch (type.toUpperCase()) {
-            case "JSON": return sanitizeJson(data);
-            case "HTML": return sanitizeHtml(data);
-            case "XML": return sanitizeXml(data);
-            default: return data.trim();
+    public String sanitize(String data, SourceType type) {
+        if (data == null) return null;
 
-        }
+        return switch (type) {
+            case SCRAPING -> sanitizeHtml(data);
+            case REST     -> sanitizeJson(data);
+            case RSS      -> sanitizeXml(data);
+            default       -> data.trim();
+
+        };
     }
 
 

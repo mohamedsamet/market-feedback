@@ -1,66 +1,63 @@
+
 package com.yesmind.agent.ai.market_feedback.adapter.processor;
 
-
+import com.yesmind.agent.ai.market_feedback.adapter.Datasanitizer.DataSanitizer;
 import com.yesmind.agent.ai.market_feedback.annoation.Sanitize;
-import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
-import com.yesmind.agent.ai.market_feedback.port.idatasanitizer.IDataSanitizer;
+import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
+import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Optional;
+import java.lang.reflect.Proxy;
+import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SanitizeProcessor {
+public class SanitizeProcessor implements BeanPostProcessor {
 
-    private final IDataSanitizer sanitizer;
+    private final DataSanitizer dataSanitizer;
 
-    public void process(Object obj, String type) {
-        if (obj == null) return;
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
-        // 1️⃣ Reflection → récupère tous les fields
-        Arrays.stream(obj.getClass().getDeclaredFields())
-
-                // 2️⃣ Reflection → garde uniquement ceux avec @Sanitize
-                .filter(field -> field.isAnnotationPresent(Sanitize.class))
-
-                // 3️⃣ traite chaque field annoté
-                .forEach(field -> sanitizeField(obj, field, type));
-    }
-
-    private void sanitizeField(Object obj, Field field, String type) {
-
-        // 4️⃣ Reflection → rend le field private accessible
-        field.setAccessible(true);
-
-        Optional.ofNullable(getFieldValue(obj, field))
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .map(raw -> sanitizer.sanitize(raw, type))
-                .ifPresent(cleaned -> setFieldValue(obj, field, cleaned));
-    }
-
-    private Object getFieldValue(Object obj, Field field) {
-        try {
-            // 5️⃣ Reflection → lit la valeur du field
-            return field.get(obj);
-        } catch (IllegalAccessException e) {
-            log.error("❌ Cannot read field '{}'", field.getName(), e);
-            return null;
+        // Wrap only consumers
+        if (!(bean instanceof DataSourceConsumable target)) {
+            return bean;
         }
-    }
 
-    private void setFieldValue(Object obj, Field field, String value) {
-        try {
-            // 6️⃣ Reflection → modifie la valeur du field
-            field.set(obj, value);
-            log.debug("✅ '{}' sanitized", field.getName());
-        } catch (IllegalAccessException e) {
-            log.error("❌ Cannot write field '{}'", field.getName(), e);
+        // Wrap only beans annotated with @Sanitize
+        Sanitize ann = bean.getClass().getAnnotation(Sanitize.class);
+        if (ann == null) {
+            return bean;
         }
+
+        final var type = ann.type();
+        log.debug("SanitizeProcessor enabled for bean={}, type={}", beanName, type);
+
+        return Proxy.newProxyInstance(
+                bean.getClass().getClassLoader(),
+                new Class[]{DataSourceConsumable.class},
+                (proxy, method, args) -> {
+
+                    Object result = method.invoke(target, args);
+
+                    // Sanitize only the result of consume()
+                    if ("consume".equals(method.getName()) && result instanceof List<?> list) {
+                        list.stream()
+                                .filter(MarketEvent.class::isInstance)
+                                .map(MarketEvent.class::cast)
+                                .filter(e -> e.getContent() != null && !e.getContent().isBlank())
+                                .forEach(e -> e.setContent(
+                                        dataSanitizer.sanitize(e.getContent(), type)
+                                ));
+                    }
+
+                    return result;
+                }
+        );
     }
 }

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-@Sanitize(type="SCRAPING")
+@Sanitize(type=SourceType.SCRAPING)
 @RequiredArgsConstructor
 @Component
 public class ScrapingConsumer implements DataSourceConsumable {

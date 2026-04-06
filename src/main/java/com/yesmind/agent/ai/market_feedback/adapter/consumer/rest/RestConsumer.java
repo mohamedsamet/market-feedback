@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.UUID;
 @Component
 @RequiredArgsConstructor
-@Sanitize(type="REST")
+@Sanitize(type=SourceType.REST)
 public class RestConsumer implements DataSourceConsumable {
 
     private static final Logger log = LoggerFactory.getLogger(RestConsumer.class);
@@ -32,7 +32,8 @@ public class RestConsumer implements DataSourceConsumable {
                 return;
             }
             String url = source.getUrl() + "&apiKey=" + source.getApiKey();
-            log.info("Appel REST API : {}", source.getDescription());            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url, Object.class)), MarketEvent.class);//transformer directement en market event
+            log.info("Appel REST API : {}", source.getDescription());
+            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url, Object.class)), MarketEvent.class);//transformer directement en market event
             event.setSourceUrl(url);
             event.setId(UUID.randomUUID().toString());
             event.setCreationDate(LocalDateTime.now());

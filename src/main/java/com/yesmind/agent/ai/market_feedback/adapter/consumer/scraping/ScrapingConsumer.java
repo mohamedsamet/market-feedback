@@ -1,6 +1,6 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.scraping;
 
-import com.yesmind.agent.ai.market_feedback.annoation.Sanitize;
+import com.yesmind.agent.ai.market_feedback.business.annoation.Sanitize;
 import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-@Sanitize(type=SourceType.SCRAPING)
 @RequiredArgsConstructor
 @Component
 public class ScrapingConsumer implements DataSourceConsumable {

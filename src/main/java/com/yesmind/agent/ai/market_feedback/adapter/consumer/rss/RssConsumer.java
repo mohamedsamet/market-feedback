@@ -1,7 +1,7 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.rss;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.yesmind.agent.ai.market_feedback.annoation.Sanitize;
+import com.yesmind.agent.ai.market_feedback.business.annoation.Sanitize;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
 import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-@Sanitize(type=SourceType.RSS)
 @Component
 @RequiredArgsConstructor
 public class RssConsumer implements DataSourceConsumable {

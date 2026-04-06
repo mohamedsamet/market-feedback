@@ -57,5 +57,11 @@ public class DataSanitizer implements IDataSanitizer {
         };
     }
 
+    @Override
+    public boolean isSafe(String data) {
+        // TODO logic
+        return true;
+    }
+
 
 }

@@ -16,15 +16,11 @@ public class CollectionScheduler {
 
     private final Consumable consumer;
 
-  //  @Scheduled(cron = "${scheduler.collection.cron}")
+    @Scheduled(cron = "${scheduler.collection.cron}")
     public void trigger() {
         log.info("Démarrage automatique de la collecte...");
         consumer.consume();
         log.info("Collecte terminée.");
     }
 
-    @PostConstruct
-    public void runAtStartup() {
-        consumer.consume(); // 👈 exécuté au démarrage
-    }
 }

@@ -7,4 +7,8 @@ public interface IDataSanitizer {
 
     String sanitize(String data, SourceType type);
 
+    default boolean isSafe(String data) {
+        return true;
+    };
+
 }

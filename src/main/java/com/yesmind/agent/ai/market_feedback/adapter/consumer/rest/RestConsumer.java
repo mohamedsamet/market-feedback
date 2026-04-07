@@ -1,6 +1,6 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yesmind.agent.ai.market_feedback.annoation.Sanitize;
+import com.yesmind.agent.ai.market_feedback.business.annoation.Sanitize;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.UUID;
 @Component
 @RequiredArgsConstructor
-@Sanitize(type=SourceType.REST)
 public class RestConsumer implements DataSourceConsumable {
 
     private static final Logger log = LoggerFactory.getLogger(RestConsumer.class);

@@ -32,6 +32,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation ("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
 	implementation("org.jsoup:jsoup:1.17.2")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20211018.1")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")

@@ -30,8 +30,9 @@ public class RestConsumer implements DataSourceConsumable {
                 log.info("⏭️ Source désactivée : {}", source.getDescription());
                 return;
             }
-            String url = source.getUrl() + "&apiKey=" + source.getApiKey();
-            log.info("Appel REST API : {}", source.getDescription());            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url, Object.class)), MarketEvent.class);//transformer directement en market event
+            String url = source.getUrl() + "&apiKey=" + source.getApiKey()+"from="+source.getFromDate();
+            log.info("Appel REST API : {}", source.getDescription());
+            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url, Object.class)), MarketEvent.class);//transformer directement en market event
             event.setSourceUrl(url);
             event.setId(UUID.randomUUID().toString());
             event.setCreationDate(LocalDateTime.now());

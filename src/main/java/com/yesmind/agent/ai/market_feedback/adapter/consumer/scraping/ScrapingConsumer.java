@@ -41,7 +41,6 @@ public class ScrapingConsumer implements DataSourceConsumable {
                 String content = doc.select(source.getTags()).text();
 
                 MarketEvent event = new MarketEvent();
-                event.setId(UUID.randomUUID().toString());
                 event.setContent(content);
                 event.setSourceUrl(url);
                 event.setCreationDate(LocalDateTime.now());

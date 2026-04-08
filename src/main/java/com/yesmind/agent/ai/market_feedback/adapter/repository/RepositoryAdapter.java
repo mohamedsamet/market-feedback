@@ -1,12 +1,14 @@
 package com.yesmind.agent.ai.market_feedback.adapter.repository;
 
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
-import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
+import com.yesmind.agent.ai.market_feedback.domain.model.MarketEventFilter;
+import com.yesmind.agent.ai.market_feedback.domain.model.PagedResult;
 import com.yesmind.agent.ai.market_feedback.port.repository.IMarketEventQuery;
 import com.yesmind.agent.ai.market_feedback.port.repository.IRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -34,16 +36,37 @@ public class RepositoryAdapter implements IRepository, IMarketEventQuery {
     }
 
     @Override
-    public List<MarketEvent> findAll() {
-        // récupère tous les documents MongoDB
-        // et les convertit en MarketEvent du domaine
-        return mongoRepository.findAll()
+    public PagedResult<MarketEvent> findAll(MarketEventFilter filter) {
+        Pageable pageable = PageRequest.of(
+                filter.getPage(),
+                filter.getSize(),
+                Sort.by(Sort.Direction.DESC, "creationDate")
+        );
+
+        Page<MarketEventDocument> page;
+        String search = filter.getSearch();
+
+        if (search != null && !search.isBlank()) {
+            page = mongoRepository.findByContentContainingIgnoreCaseOrSourceUrlContainingIgnoreCase(
+                    search, search, pageable
+            );
+        } else {
+            page = mongoRepository.findAll(pageable);
+        }
+
+        List<MarketEvent> events = page.getContent()
                 .stream()
                 .map(this::toMarketEvent)
                 .collect(Collectors.toList());
+
+        return PagedResult.<MarketEvent>builder()
+                .content(events)
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .currentPage(filter.getPage())
+                .build();
     }
 
-    // conversion MarketEventDocument → MarketEvent
     private MarketEvent toMarketEvent(MarketEventDocument doc) {
         MarketEvent event = new MarketEvent();
         event.setId(doc.getId());

@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +32,6 @@ public class RepositoryAdapter implements IRepository, IMarketEventQuery {
                 .sourceType(event.getSourceType())
                 .creationDate(event.getCreationDate())
                 .build();
-
         mongoRepository.save(document);
         log.info("💾 Sauvegardé dans MongoDB : {}", event.getSourceUrl());
     }
@@ -43,10 +44,20 @@ public class RepositoryAdapter implements IRepository, IMarketEventQuery {
                 Sort.by(Sort.Direction.DESC, "creationDate")
         );
 
-        Page<MarketEventDocument> page;
         String search = filter.getSearch();
+        String source = filter.getSource();
+        boolean hasSearch = search != null && !search.isBlank();
+        boolean hasSource = source != null && !source.isBlank();
 
-        if (search != null && !search.isBlank()) {
+        Page<MarketEventDocument> page;
+
+        if (hasSource && hasSearch) {
+            page = mongoRepository.findBySourceUrlContainingAndContentContainingIgnoreCase(
+                    source, search, pageable
+            );
+        } else if (hasSource) {
+            page = mongoRepository.findBySourceUrlContaining(source, pageable);
+        } else if (hasSearch) {
             page = mongoRepository.findByContentContainingIgnoreCaseOrSourceUrlContainingIgnoreCase(
                     search, search, pageable
             );
@@ -65,6 +76,17 @@ public class RepositoryAdapter implements IRepository, IMarketEventQuery {
                 .totalPages(page.getTotalPages())
                 .currentPage(filter.getPage())
                 .build();
+    }
+
+    @Override
+    public long countToday() {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        return mongoRepository.countByCreationDateBetween(start, end);
+    }
+    @Override
+    public long countDistinctSources() {
+        return mongoRepository.countDistinctSourceUrls();
     }
 
     private MarketEvent toMarketEvent(MarketEventDocument doc) {

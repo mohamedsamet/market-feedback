@@ -18,4 +18,12 @@ public class MarketEventService implements GetMarketEventsUseCase {
     public PagedResult<MarketEvent> getAll(MarketEventFilter filter) {
         return query.findAll(filter);
     }
+    @Override
+    public long countToday() {
+        return query.countToday();
+    }
+    @Override
+    public long countDistinctSources() {
+        return query.countDistinctSources();
+    }
 }

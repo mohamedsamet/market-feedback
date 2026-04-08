@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/market-events")
 @RequiredArgsConstructor
@@ -20,11 +22,13 @@ public class MarketEventController {
     @GetMapping
     public ResponseEntity<PagedResultDTO<MarketEventDTO>> getAll(
             @RequestParam(defaultValue = "")  String search,
+            @RequestParam(defaultValue = "") String source,
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         MarketEventFilter filter = MarketEventFilter.builder()
                 .search(search)
+                .source(source)
                 .page(page)
                 .size(size)
                 .build();
@@ -40,4 +44,13 @@ public class MarketEventController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Long>> getStats() {
+        return ResponseEntity.ok(Map.of(
+                "today",   useCase.countToday(),
+                "sources", useCase.countDistinctSources()
+        ));
+    }
+
 }

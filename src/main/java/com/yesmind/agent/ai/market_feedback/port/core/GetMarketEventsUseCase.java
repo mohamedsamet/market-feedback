@@ -6,4 +6,7 @@ import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 
 public interface GetMarketEventsUseCase {
     PagedResult<MarketEvent> getAll(MarketEventFilter filter);
+    long countToday();
+    long countDistinctSources();
+
 }

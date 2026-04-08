@@ -11,4 +11,4 @@ public class MarketEventFilter {
     private String search;
     private int page;
     private int size;
-}
+    private String source;}

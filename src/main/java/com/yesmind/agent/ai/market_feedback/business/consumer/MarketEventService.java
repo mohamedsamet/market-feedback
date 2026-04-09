@@ -7,7 +7,7 @@ import com.yesmind.agent.ai.market_feedback.port.core.GetMarketEventsUseCase;
 import com.yesmind.agent.ai.market_feedback.port.repository.IMarketEventQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+//logique metier :reçoit le filter du controller, le passe au repository
 @Service
 @RequiredArgsConstructor
 public class MarketEventService implements GetMarketEventsUseCase {

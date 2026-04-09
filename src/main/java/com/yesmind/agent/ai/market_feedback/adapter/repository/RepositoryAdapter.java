@@ -38,6 +38,7 @@ public class RepositoryAdapter implements IRepository, IMarketEventQuery {
 
     @Override
     public PagedResult<MarketEvent> findAll(MarketEventFilter filter) {
+        //1 construire la pagination
         Pageable pageable = PageRequest.of(
                 filter.getPage(),
                 filter.getSize(),
@@ -48,40 +49,42 @@ public class RepositoryAdapter implements IRepository, IMarketEventQuery {
         String source = filter.getSource();
         boolean hasSearch = search != null && !search.isBlank();
         boolean hasSource = source != null && !source.isBlank();
-
+        //2choisir la bonne requête MongoDB selon les filtres actifs
         Page<MarketEventDocument> page;
 
-        if (hasSource && hasSearch) {
+        if (hasSource && hasSearch) {// les deux filtres actifs → cherche dans les deux
             page = mongoRepository.findBySourceUrlContainingAndContentContainingIgnoreCase(
                     source, search, pageable
             );
-        } else if (hasSource) {
+        } else if (hasSource) {//source seule → filtre par sourceUrl
+
             page = mongoRepository.findBySourceUrlContaining(source, pageable);
-        } else if (hasSearch) {
-            page = mongoRepository.findByContentContainingIgnoreCaseOrSourceUrlContainingIgnoreCase(
-                    search, search, pageable
+        } else if (hasSearch) {// search seul → cherche dans content
+            page = mongoRepository.findByContentContainingIgnoreCase(
+                    search, pageable
             );
-        } else {
+        } else {// rien → retourne tout
             page = mongoRepository.findAll(pageable);
         }
-
+        //3. convertir les documents MongoDB en objets domaine
         List<MarketEvent> events = page.getContent()
                 .stream()
                 .map(this::toMarketEvent)
                 .collect(Collectors.toList());
-
+        // 4. emballer dans un PagedResult
         return PagedResult.<MarketEvent>builder()
                 .content(events)
-                .totalElements(page.getTotalElements())
+                .totalElements(page.getTotalElements())//compte pour la ticket nb total
                 .totalPages(page.getTotalPages())
                 .currentPage(filter.getPage())
                 .build();
     }
-
+//cartes stats
     @Override
+    //Carte "Aujourd'hui"
     public long countToday() {
         LocalDateTime start = LocalDate.now().atStartOfDay();
-        LocalDateTime end = start.plusDays(1);
+        LocalDateTime end = start.plusDays(1);//24h de minuit a minuit
         return mongoRepository.countByCreationDateBetween(start, end);
     }
     @Override

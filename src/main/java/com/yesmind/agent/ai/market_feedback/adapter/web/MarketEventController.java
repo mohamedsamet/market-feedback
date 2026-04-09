@@ -18,7 +18,10 @@ public class MarketEventController {
 
     private final GetMarketEventsUseCase useCase;
     private final MarketEventMapper mapper;
-
+/*
+intercepte l'URL exp :GET /api/market-events?search=bvmt&source=newsapi.org&page=0&size=10,
+extrait les paramètres, construit le MarketEventFilter et le passe au service.
+ */
     @GetMapping
     public ResponseEntity<PagedResultDTO<MarketEventDTO>> getAll(
             @RequestParam(defaultValue = "")  String search,
@@ -44,12 +47,16 @@ public class MarketEventController {
 
         return ResponseEntity.ok(response);
     }
-
+/*
+endpoint séparé du listing
+pour ne pas surcharger chaque requête de pagination avec des calculs lourds.
+Les stats sont chargées une seule fois au démarrage.
+ */
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Long>> getStats() {
         return ResponseEntity.ok(Map.of(
-                "today",   useCase.countToday(),
-                "sources", useCase.countDistinctSources()
+                "today",   useCase.countToday(),//ticket de nb d'aujourdhui
+                "sources", useCase.countDistinctSources()//ticket de suorces actives
         ));
     }
 

@@ -64,7 +64,6 @@ public class RestConsumer implements DataSourceConsumable {
                     );
 
                     event.setSourceUrl(url);
-                    event.setId(UUID.randomUUID().toString());
                     event.setCreationDate(LocalDateTime.now());
                     event.setSourceType(SourceType.REST);
 

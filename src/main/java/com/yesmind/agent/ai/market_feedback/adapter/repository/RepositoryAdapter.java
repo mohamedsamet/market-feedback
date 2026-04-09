@@ -22,11 +22,13 @@ public class RepositoryAdapter implements IRepository, IMarketEventQuery {
 
     private static final Logger log = LoggerFactory.getLogger(RepositoryAdapter.class);
     private final MarketEventMongoRepository mongoRepository;
-
+    private long generateSequentialId() {
+        return mongoRepository.count() + 1;
+    }
     @Override
     public void save(MarketEvent event) {
         MarketEventDocument document = MarketEventDocument.builder()
-                .id(event.getId())
+                .id(String.valueOf(generateSequentialId()))
                 .content(event.getContent())
                 .sourceUrl(event.getSourceUrl())
                 .sourceType(event.getSourceType())

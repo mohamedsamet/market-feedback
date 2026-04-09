@@ -42,7 +42,6 @@ public class RssConsumer implements DataSourceConsumable {
                 Object content = xmlMapper.readValue(Objects.requireNonNull(responseXml), Object.class);
                 MarketEvent event = new MarketEvent();
                 event.setContent(content.toString());
-                event.setId(UUID.randomUUID().toString());
                 event.setSourceUrl(url);
                 event.setCreationDate(LocalDateTime.now());
                 event.setSourceType(SourceType.RSS);

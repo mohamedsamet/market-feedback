@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -59,6 +60,20 @@ Les stats sont chargées une seule fois au démarrage.
                 "today",   useCase.countToday(),//ticket de nb d'aujourdhui
                 "sources", useCase.countDistinctSources()//ticket de suorces actives
         ));
+    }
+    //delete
+    // supprimer un seul
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOne(@PathVariable String id) {
+        useCase.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // supprimer plusieurs
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMany(@RequestBody List<String> ids) {
+        useCase.deleteAllById(ids);
+        return ResponseEntity.noContent().build();
     }
 
 }

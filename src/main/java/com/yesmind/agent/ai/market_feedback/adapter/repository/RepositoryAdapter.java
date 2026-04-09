@@ -103,4 +103,16 @@ public class RepositoryAdapter implements IRepository, IMarketEventQuery {
         event.setCreationDate(doc.getCreationDate());
         return event;
     }
+    //delete
+    @Override
+    public void deleteById(String id) {
+        mongoRepository.deleteById(id);
+        log.info("🗑️ Supprimé de MongoDB : {}", id);
+    }
+
+    @Override
+    public void deleteAllById(List<String> ids) {
+        mongoRepository.deleteAllById(ids);
+        log.info("🗑️ Supprimé {} événements de MongoDB", ids.size());
+    }
 }

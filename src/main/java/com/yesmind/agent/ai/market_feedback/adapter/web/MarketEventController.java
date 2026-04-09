@@ -22,6 +22,7 @@ public class MarketEventController {
 intercepte l'URL exp :GET /api/market-events?search=bvmt&source=newsapi.org&page=0&size=10,
 extrait les paramètres, construit le MarketEventFilter et le passe au service.
  */
+    // reçoit la requête du frontend et retourne les données en JSON
     @GetMapping
     public ResponseEntity<PagedResultDTO<MarketEventDTO>> getAll(
             @RequestParam(defaultValue = "")  String search,
@@ -36,7 +37,7 @@ extrait les paramètres, construit le MarketEventFilter et le passe au service.
                 .size(size)
                 .build();
 
-        PagedResult<MarketEvent> result = useCase.getAll(filter);
+        PagedResult<MarketEvent> result = useCase.getAll(filter);//Appelle le use case qui va chercher les données dans MongoDB
 
         PagedResultDTO<MarketEventDTO> response = PagedResultDTO.<MarketEventDTO>builder()
                 .content(mapper.toDTOList(result.getContent()))

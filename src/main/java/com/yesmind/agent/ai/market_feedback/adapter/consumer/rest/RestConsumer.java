@@ -16,6 +16,11 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 public class RestConsumer implements DataSourceConsumable {
+    /*
+    NewsAPI retourne plusieurs articles dans une seule réponse
+    il faut boucler sur chaque article
+     un MarketEvent par article.
+     */
 
     private static final Logger log = LoggerFactory.getLogger(RestConsumer.class);
 
@@ -39,7 +44,7 @@ public class RestConsumer implements DataSourceConsumable {
                 String url = source.getUrl() + "&apiKey=" + source.getApiKey();
                 log.info("Appel REST API : {}", source.getDescription());
 
-                // 1️⃣ Appel API
+
                 Object response = restTemplate.getForObject(url, Object.class);
 
                 Map<String, Object> map = mapper.convertValue(response, Map.class);

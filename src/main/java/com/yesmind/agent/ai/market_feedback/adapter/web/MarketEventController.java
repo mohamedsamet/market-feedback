@@ -14,8 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/market-events")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
-public class MarketEventController {
+public class MarketEventController extends MainController {
 
     private final GetMarketEventsUseCase useCase;
     private final MarketEventMapper mapper;

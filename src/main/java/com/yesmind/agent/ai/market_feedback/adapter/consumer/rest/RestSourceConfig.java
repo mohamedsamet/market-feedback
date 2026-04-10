@@ -17,6 +17,7 @@ public class RestSourceConfig {
     private String method;
 
     private boolean enabled;
+    private String query;
 
     private int timeout;
 

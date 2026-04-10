@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Component
 @RequiredArgsConstructor
 
@@ -30,13 +32,28 @@ public class RestConsumer implements DataSourceConsumable {
                 log.info("⏭️ Source désactivée : {}", source.getDescription());
                 return;
             }
-            String url = source.getUrl() +"?q=" + source.getQuery()  + "&apiKey=" + source.getApiKey() + "&from=" + source.getFromDate();
+            StringBuilder url =new StringBuilder(source.getUrl()+ "?")  ;
+            AtomicInteger i = new AtomicInteger();
+            source.getParams().forEach(param -> {
+                url.append(param.getKey());
+                url.append("=");
+                url.append(param.getValue());
+                int count = i.getAndIncrement();
+                if(count!=0&&count!=source.getParams().size()){
+                    url.append("&");
+                }
+            });
+            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url.toString(), Object.class)), MarketEvent.class);//t
+            if(source.getContentPath()!=null){
+            }else {
+                event.setContent();
+                event.setSourceUrl(url.toString());
+                event.setId(UUID.randomUUID().toString());
+                event.setCreationDate(LocalDateTime.now());
+                event.setSourceType(SourceType.REST);
+            }
             log.info("Appel REST API : {}", source.getDescription());
-            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url, Object.class)), MarketEvent.class);//transformer directement en market event
-            event.setSourceUrl(url);
-            event.setId(UUID.randomUUID().toString());
-            event.setCreationDate(LocalDateTime.now());
-            event.setSourceType(SourceType.REST); // ou RSS / Scraping
+          // ou RSS / Scraping
             allEvents.add(event);
             log.info("MarketEvent créé depuis : {}", source.getDescription());
         });

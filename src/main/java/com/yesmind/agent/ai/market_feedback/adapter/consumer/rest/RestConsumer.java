@@ -9,10 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -38,23 +35,37 @@ public class RestConsumer implements DataSourceConsumable {
                 url.append(param.getKey());
                 url.append("=");
                 url.append(param.getValue());
-                int count = i.getAndIncrement();
+                int count = i.incrementAndGet();
                 if(count!=0&&count!=source.getParams().size()){
                     url.append("&");
                 }
             });
-            MarketEvent event = mapper.convertValue(Objects.requireNonNull(restTemplate.getForObject(url.toString(), Object.class)), MarketEvent.class);//t
+            Object rawResponse = restTemplate.getForObject(url.toString(), Object.class);
+
             if(source.getContentPath()!=null){
-            }else {
-                event.setContent();
+                Map<String, Object> map = (Map<String, Object>) rawResponse;
+                List<Map<String, Object>> items = (List<Map<String, Object>>) map.get(source.getContentPath());
+                items.forEach(rawMap -> {
+                    MarketEvent event = mapper.convertValue(rawMap, MarketEvent.class);
+                    event.setContent(rawMap.toString());
+                    event.setSourceUrl(url.toString());
+                    event.setId(UUID.randomUUID().toString());
+                    event.setCreationDate(LocalDateTime.now());
+                    event.setSourceType(SourceType.REST);
+                    allEvents.add(event);
+                });
+            }
+            else {
+                MarketEvent event = mapper.convertValue(rawResponse, MarketEvent.class);
+                event.setContent(rawResponse.toString());
                 event.setSourceUrl(url.toString());
                 event.setId(UUID.randomUUID().toString());
                 event.setCreationDate(LocalDateTime.now());
                 event.setSourceType(SourceType.REST);
+                allEvents.add(event);
             }
             log.info("Appel REST API : {}", source.getDescription());
           // ou RSS / Scraping
-            allEvents.add(event);
             log.info("MarketEvent créé depuis : {}", source.getDescription());
         });
 

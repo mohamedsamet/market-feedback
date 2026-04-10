@@ -19,13 +19,17 @@ public class RestSourceConfig {
     private String method;
 
     private boolean enabled;
+
     private String query;
+
     private List<RestUrlParam> params=new ArrayList<>();
 
     private int timeout;
+
     private String contentPath;
+
     private String description;
-    private int daysBack;
+
     private int retry;
 
 

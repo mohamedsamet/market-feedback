@@ -17,3 +17,4 @@ public class PublisherAdapter implements IPublisher {
         log.info("Publication : {}", event.getSourceUrl());
     }
 }
+

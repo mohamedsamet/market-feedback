@@ -1,6 +1,7 @@
 package com.yesmind.agent.ai.market_feedback.adapter.consumer.rss;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.yesmind.agent.ai.market_feedback.business.annoation.Sanitize;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEvent;
 import com.yesmind.agent.ai.market_feedback.domain.model.SourceType;
 import com.yesmind.agent.ai.market_feedback.port.datasource.DataSourceConsumable;
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class RssConsumer implements DataSourceConsumable {
@@ -26,6 +26,7 @@ public class RssConsumer implements DataSourceConsumable {
     private static final Logger log = LoggerFactory.getLogger(RssConsumer.class);
 
     @Override
+
     public List<MarketEvent> consume() {
         List<MarketEvent> allEvents = new ArrayList<>();
         log.info("Lecture du flux RSS...");
@@ -41,7 +42,6 @@ public class RssConsumer implements DataSourceConsumable {
                 Object content = xmlMapper.readValue(Objects.requireNonNull(responseXml), Object.class);
                 MarketEvent event = new MarketEvent();
                 event.setContent(content.toString());
-                event.setId(UUID.randomUUID().toString());
                 event.setSourceUrl(url);
                 event.setCreationDate(LocalDateTime.now());
                 event.setSourceType(SourceType.RSS);

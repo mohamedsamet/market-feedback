@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @RequiredArgsConstructor
@@ -32,27 +33,44 @@ public class RestConsumer implements DataSourceConsumable {
                 log.info("⏭️ Source désactivée : {}", source.getDescription());
                 return;
             }
+            StringBuilder url =new StringBuilder(source.getUrl()+ "?")  ;
+            AtomicInteger i = new AtomicInteger();
+            source.getParams().forEach(param -> {
+                url.append(param.getKey());
+                url.append("=");
+                url.append(param.getValue());
+                int count = i.incrementAndGet();
+                if(count!=0&&count!=source.getParams().size()){
+                    url.append("&");
+                }
+            });
+            Object rawResponse = restTemplate.getForObject(url.toString(), Object.class);
 
-            String url = source.getUrl() + "&apiKey=" + source.getApiKey();
-            log.info("Appel REST API : {}", source.getDescription());
-
-            try {
-                // récupérer la réponse brute de l'API en String
-                String response = restTemplate.getForObject(url, String.class);
-
-                MarketEvent event = new MarketEvent();
-                event.setContent(response);                  // stocke la réponse complète
-                event.setSourceUrl(url);
+            if(source.getContentPath()!=null){
+                Map<String, Object> map = (Map<String, Object>) rawResponse;
+                List<Map<String, Object>> items = (List<Map<String, Object>>) map.get(source.getContentPath());
+                items.forEach(rawMap -> {
+                    MarketEvent event = mapper.convertValue(rawMap, MarketEvent.class);
+                    event.setContent(rawMap.toString());
+                    event.setSourceUrl(url.toString());
+                    event.setId(UUID.randomUUID().toString());
+                    event.setCreationDate(LocalDateTime.now());
+                    event.setSourceType(SourceType.REST);
+                    allEvents.add(event);
+                });
+            }
+            else {
+                MarketEvent event = mapper.convertValue(rawResponse, MarketEvent.class);
+                event.setContent(rawResponse.toString());
+                event.setSourceUrl(url.toString());
+                event.setId(UUID.randomUUID().toString());
                 event.setCreationDate(LocalDateTime.now());
                 event.setSourceType(SourceType.REST);
-
                 allEvents.add(event);
-
-                log.info("✔ MarketEvent créé depuis : {}", source.getDescription());
-
-            } catch (Exception e) {
-                log.error("❌ Erreur API {} : {}", source.getDescription(), e.getMessage());
             }
+            log.info("Appel REST API : {}", source.getDescription());
+          // ou RSS / Scraping
+            log.info("MarketEvent créé depuis : {}", source.getDescription());
         });
 
         return allEvents;

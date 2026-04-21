@@ -28,7 +28,7 @@ extrait les paramètres, construit le MarketEventFilter et le passe au service.
             @RequestParam(defaultValue = "")  String search,
             @RequestParam(defaultValue = "") String source,
             @RequestParam(defaultValue = "0")  int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "50") int size
     ) {
         MarketEventFilter filter = MarketEventFilter.builder()
                 .search(search)

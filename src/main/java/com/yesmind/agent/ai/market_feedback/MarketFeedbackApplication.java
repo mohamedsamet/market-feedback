@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 @EnableScheduling
 
+
 public class MarketFeedbackApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MarketFeedbackApplication.class, args);

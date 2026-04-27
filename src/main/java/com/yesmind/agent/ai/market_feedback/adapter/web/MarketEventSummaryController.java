@@ -22,13 +22,11 @@ public class MarketEventSummaryController extends MainController {
     @GetMapping
     public ResponseEntity<PagedResultDTO<MarketEventSummaryDTO>> getAll(
             @RequestParam(defaultValue = "") String search,
-            @RequestParam(defaultValue = "") String theme,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size
     ) {
         MarketEventSummaryFilter filter = MarketEventSummaryFilter.builder()
                 .search(search)
-                .theme(theme)
                 .page(page)
                 .size(size)
                 .build();
@@ -43,11 +41,6 @@ public class MarketEventSummaryController extends MainController {
                 .build();
 
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/themes")
-    public ResponseEntity<List<String>> getThemes() {
-        return ResponseEntity.ok(useCase.getDistinctThemes());
     }
 
     @GetMapping("/stats")

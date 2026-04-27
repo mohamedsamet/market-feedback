@@ -7,7 +7,6 @@ import com.yesmind.agent.ai.market_feedback.domain.model.PagedResult;
 import com.yesmind.agent.ai.market_feedback.port.core.GetMarketEventsSummaryUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -29,11 +28,6 @@ public class GetMarketEventsSummaryUseCaseImpl implements GetMarketEventsSummary
     @Override
     public long countDistinctTypes() {
         return repositoryAdapter.countDistinctTypes();
-    }
-
-    @Override
-    public List<String> getDistinctThemes() {
-        return repositoryAdapter.findDistinctThemes();
     }
 
     @Override

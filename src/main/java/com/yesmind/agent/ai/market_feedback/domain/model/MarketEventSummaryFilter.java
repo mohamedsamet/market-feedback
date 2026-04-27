@@ -8,8 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MarketEventSummaryFilter {
-    private String search;   // cherche dans theme ou contenu
-    private String theme;     // filtre par theme (RSS, etc.)
+    private String search;   // cherche dans theme OU contenu_fr OU contenu_en
     private int page;
     private int size;
 }

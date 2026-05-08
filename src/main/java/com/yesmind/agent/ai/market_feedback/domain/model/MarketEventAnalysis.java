@@ -2,6 +2,7 @@ package com.yesmind.agent.ai.market_feedback.domain.model;
 
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,7 +16,7 @@ public class MarketEventAnalysis {
     private String type;
     private LocalDateTime genereLe;
     private String prediction;
-    private String proposition;
+    private List<String> propositions;
     private String ton;
     private String urgence;
     private String categorie;

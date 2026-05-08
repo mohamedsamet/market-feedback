@@ -2,10 +2,9 @@ package com.yesmind.agent.ai.market_feedback.adapter.repository;
 
 import com.yesmind.agent.ai.market_feedback.domain.model.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.stream.*;
 
 @Component
 @RequiredArgsConstructor
@@ -15,22 +14,46 @@ public class MarketEventAnalysisRepositoryAdapter {
 
     public PagedResult<MarketEventAnalysis> findAll(MarketEventAnalysisFilter filter) {
 
-        boolean hasSearch  = filter.getSearch()      != null && !filter.getSearch().isBlank();
+        boolean hasSearch  = filter.getSearch()  != null && !filter.getSearch().isBlank();
         boolean hasUrgence = filter.getUrgence() != null && !filter.getUrgence().isBlank();
 
         List<MarketEventAnalysisDocument> docs;
 
         if (hasSearch && hasUrgence) {
-            docs = mongoRepository
-                    .findByUrgenceIgnoreCaseAndPredictionContainingIgnoreCaseOrUrgenceIgnoreCaseAndPropositionContainingIgnoreCase(
-                            filter.getUrgence(), filter.getSearch(),
-                            filter.getUrgence(), filter.getSearch());
+            // union : prediction OU propositions, filtrés par urgence
+            Set<String> ids = new LinkedHashSet<>();
+            List<MarketEventAnalysisDocument> merged = new ArrayList<>();
+
+            mongoRepository
+                    .findByUrgenceIgnoreCaseAndPredictionContainingIgnoreCase(
+                            filter.getUrgence(), filter.getSearch())
+                    .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
+
+            mongoRepository
+                    .findByUrgenceAndPropositionsContainingIgnoreCase(
+                            filter.getUrgence(), filter.getSearch())
+                    .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
+
+            docs = merged;
+
         } else if (hasUrgence) {
             docs = mongoRepository.findByUrgenceIgnoreCase(filter.getUrgence());
+
         } else if (hasSearch) {
-            docs = mongoRepository
-                    .findByPredictionContainingIgnoreCaseOrPropositionContainingIgnoreCase(
-                            filter.getSearch(), filter.getSearch());
+            // union : prediction OU propositions
+            Set<String> ids = new LinkedHashSet<>();
+            List<MarketEventAnalysisDocument> merged = new ArrayList<>();
+
+            mongoRepository
+                    .findByPredictionContainingIgnoreCase(filter.getSearch())
+                    .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
+
+            mongoRepository
+                    .findByPropositionsContainingIgnoreCase(filter.getSearch())
+                    .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
+
+            docs = merged;
+
         } else {
             docs = mongoRepository.findAll();
         }
@@ -59,7 +82,7 @@ public class MarketEventAnalysisRepositoryAdapter {
                 .type(doc.getType())
                 .genereLe(doc.getGenereLe())
                 .prediction(doc.getPrediction())
-                .proposition(doc.getProposition())
+                .propositions(doc.getPropositions())   // ← List<String>
                 .ton(doc.getTon())
                 .urgence(doc.getUrgence())
                 .categorie(doc.getCategorie())

@@ -16,7 +16,7 @@ public class MarketEventAnalysisMapper {
                 .type(analysis.getType())
                 .genereLe(analysis.getGenereLe())
                 .prediction(analysis.getPrediction())
-                .proposition(analysis.getProposition())
+                .propositions(analysis.getPropositions())
                 .ton(analysis.getTon())
                 .urgence(analysis.getUrgence())
                 .categorie(analysis.getCategorie())

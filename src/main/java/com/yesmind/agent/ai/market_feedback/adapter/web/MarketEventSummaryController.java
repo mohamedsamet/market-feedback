@@ -47,7 +47,7 @@ public class MarketEventSummaryController extends MainController {
     public ResponseEntity<Map<String, Long>> getStats() {
         return ResponseEntity.ok(Map.of(
                 "today",   useCase.countTotal(),
-                "sources", useCase.countDistinctTypes()
+                "sources", useCase.countDistinctFamilles()  // ← corrigé
         ));
     }
 

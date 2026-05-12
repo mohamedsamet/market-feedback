@@ -7,24 +7,43 @@ import java.util.List;
 public interface MarketEventAnalysisMongoRepository
         extends MongoRepository<MarketEventAnalysisDocument, String> {
 
-    // recherche dans prediction uniquement (propositions est un array, géré séparément)
-    List<MarketEventAnalysisDocument> findByPredictionContainingIgnoreCase(String prediction);
+    // filtre par famille
+    List<MarketEventAnalysisDocument> findByFamilleIgnoreCase(String famille);
 
-    // filtre par urgence
-    List<MarketEventAnalysisDocument> findByUrgenceIgnoreCase(String urgence);
+    // filtre par urgence dans themes[]
+    @Query("{ 'themes': { $elemMatch: { 'urgence': { $regex: ?0, $options: 'i' } } } }")
+    List<MarketEventAnalysisDocument> findByThemesUrgenceIgnoreCase(String urgence);
 
-    // recherche + filtre urgence
-    List<MarketEventAnalysisDocument> findByUrgenceIgnoreCaseAndPredictionContainingIgnoreCase(
-            String urgence, String prediction
-    );
+    // filtre famille + urgence dans themes[]
+    @Query("{ 'famille': { $regex: ?0, $options: 'i' }, " +
+            "'themes': { $elemMatch: { 'urgence': { $regex: ?1, $options: 'i' } } } }")
+    List<MarketEventAnalysisDocument> findByFamilleAndThemesUrgence(String famille, String urgence);
 
-    // recherche dans propositions (array) via @Query
-    @Query("{ 'propositions': { $elemMatch: { $regex: ?0, $options: 'i' } } }")
-    List<MarketEventAnalysisDocument> findByPropositionsContainingIgnoreCase(String search);
+    // recherche dans themes[].theme
+    @Query("{ 'themes': { $elemMatch: { 'theme': { $regex: ?0, $options: 'i' } } } }")
+    List<MarketEventAnalysisDocument> findByThemesThemeContainingIgnoreCase(String search);
 
-    // recherche dans propositions + filtre urgence
-    @Query("{ 'urgence': { $regex: ?0, $options: 'i' }, 'propositions': { $elemMatch: { $regex: ?1, $options: 'i' } } }")
-    List<MarketEventAnalysisDocument> findByUrgenceAndPropositionsContainingIgnoreCase(
-            String urgence, String search
-    );
+    // recherche dans themes[].prediction
+    @Query("{ 'themes': { $elemMatch: { 'prediction': { $regex: ?0, $options: 'i' } } } }")
+    List<MarketEventAnalysisDocument> findByThemesPredictionContainingIgnoreCase(String search);
+
+    // recherche globale : famille OU themes[].theme OU themes[].prediction OU themes[].proposition
+    @Query("{ $or: [ " +
+            "{ 'famille': { $regex: ?0, $options: 'i' } }, " +
+            "{ 'themes': { $elemMatch: { 'theme': { $regex: ?0, $options: 'i' } } } }, " +
+            "{ 'themes': { $elemMatch: { 'prediction': { $regex: ?0, $options: 'i' } } } }, " +
+            "{ 'themes': { $elemMatch: { 'proposition': { $regex: ?0, $options: 'i' } } } } " +
+            "] }")
+    List<MarketEventAnalysisDocument> findBySearchIgnoreCase(String search);
+
+    // recherche globale + filtre urgence — sans Pageable
+    @Query("{ $and: [ " +
+            "{ 'themes': { $elemMatch: { 'urgence': { $regex: ?0, $options: 'i' } } } }, " +
+            "{ $or: [ " +
+            "{ 'famille': { $regex: ?1, $options: 'i' } }, " +
+            "{ 'themes': { $elemMatch: { 'theme': { $regex: ?1, $options: 'i' } } } }, " +
+            "{ 'themes': { $elemMatch: { 'prediction': { $regex: ?1, $options: 'i' } } } } " +
+            "] } " +
+            "] }")
+    List<MarketEventAnalysisDocument> findByUrgenceAndSearch(String urgence, String search);
 }

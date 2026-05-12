@@ -8,7 +8,7 @@ import java.util.List;
 public interface GetMarketEventsSummaryUseCase {
     PagedResult<MarketEventSummary> getAll(MarketEventSummaryFilter filter);
     long countTotal();
-    long countDistinctTypes();
+    long countDistinctFamilles();   // ← renommé
     void deleteById(String id);
     void deleteAllById(List<String> ids);
 }

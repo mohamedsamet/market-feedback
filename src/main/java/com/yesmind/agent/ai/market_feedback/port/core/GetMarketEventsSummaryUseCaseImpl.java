@@ -1,4 +1,4 @@
-package com.yesmind.agent.ai.market_feedback.business.core;
+package com.yesmind.agent.ai.market_feedback.port.core;
 
 import com.yesmind.agent.ai.market_feedback.adapter.repository.MarketEventSummaryRepositoryAdapter;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEventSummary;
@@ -26,8 +26,8 @@ public class GetMarketEventsSummaryUseCaseImpl implements GetMarketEventsSummary
     }
 
     @Override
-    public long countDistinctTypes() {
-        return repositoryAdapter.countDistinctTypes();
+    public long countDistinctFamilles() {                          // ← renommé
+        return repositoryAdapter.countDistinctFamilles();          // ← renommé
     }
 
     @Override

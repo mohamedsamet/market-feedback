@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class MarketEventAnalysisFilter {
     private String search;
+    private String famille;
     private String urgence;
     private int page;
     private int size;

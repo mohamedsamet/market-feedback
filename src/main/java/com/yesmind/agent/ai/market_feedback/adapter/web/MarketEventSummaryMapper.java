@@ -10,16 +10,23 @@ import java.util.stream.Collectors;
 public class MarketEventSummaryMapper {
 
     public MarketEventSummaryDTO toDTO(MarketEventSummary summary) {
+        List<MarketEventSummaryDTO.ThemeSummaryDTO> themes = summary.getThemes() == null
+                ? List.of()
+                : summary.getThemes().stream()
+                .map(t -> MarketEventSummaryDTO.ThemeSummaryDTO.builder()
+                        .theme(t.getTheme())
+                        .contenuFr(t.getContenuFr())
+                        .contenuEn(t.getContenuEn())
+                        .build())
+                .collect(Collectors.toList());
+
         return MarketEventSummaryDTO.builder()
                 .id(summary.getId())
-                .theme(summary.getTheme())
-                .nombreArticles(summary.getNombreArticles())
+                .famille(summary.getFamille())
                 .genereLe(summary.getGenereLe())
-                .type(summary.getType())
-                .contenuFr(summary.getContenuFr())
-                .contenuEn(summary.getContenuEn())
                 .pageDB(summary.getPageDB())
                 .totalPagesDB(summary.getTotalPagesDB())
+                .themes(themes)
                 .build();
     }
 

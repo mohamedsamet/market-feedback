@@ -18,21 +18,40 @@ public class MarketEventAnalysisDocument {
     @Id
     private String id;
 
-    @Field("source_id")
-    private String sourceId;
-
-    private String theme;
-    private String type;
+    private String famille;
 
     @Field("genere_le")
     private LocalDateTime genereLe;
 
-    private String prediction;
-    private List<String> propositions;
-    private String ton;
-    private String urgence;
-    private String categorie;
+    @Field("total_themes")
+    private int totalThemes;
+
+    @Field("pageDB")
+    private int pageDB;
+
+    @Field("totalPagesDB")
+    private int totalPagesDB;
 
     @Field("analyse_le")
     private LocalDateTime analyseEl;
+
+    private List<ThemeDocument> themes;
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ThemeDocument {
+
+        private String theme;
+        private String prediction;
+        private String proposition;
+        private String ton;
+        private String urgence;
+        private String categorie;
+
+        @Field("analyse_le")
+        private LocalDateTime analyseEl;
+    }
 }

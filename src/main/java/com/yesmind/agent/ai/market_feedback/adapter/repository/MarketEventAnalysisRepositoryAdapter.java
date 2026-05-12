@@ -16,43 +16,26 @@ public class MarketEventAnalysisRepositoryAdapter {
 
         boolean hasSearch  = filter.getSearch()  != null && !filter.getSearch().isBlank();
         boolean hasUrgence = filter.getUrgence() != null && !filter.getUrgence().isBlank();
+        boolean hasFamille = filter.getFamille() != null && !filter.getFamille().isBlank();
 
         List<MarketEventAnalysisDocument> docs;
 
         if (hasSearch && hasUrgence) {
-            // union : prediction OU propositions, filtrés par urgence
-            Set<String> ids = new LinkedHashSet<>();
-            List<MarketEventAnalysisDocument> merged = new ArrayList<>();
+            docs = mongoRepository.findByUrgenceAndSearch(
+                    filter.getUrgence(), filter.getSearch());
 
-            mongoRepository
-                    .findByUrgenceIgnoreCaseAndPredictionContainingIgnoreCase(
-                            filter.getUrgence(), filter.getSearch())
-                    .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
+        } else if (hasFamille && hasUrgence) {
+            docs = mongoRepository.findByFamilleAndThemesUrgence(
+                    filter.getFamille(), filter.getUrgence());
 
-            mongoRepository
-                    .findByUrgenceAndPropositionsContainingIgnoreCase(
-                            filter.getUrgence(), filter.getSearch())
-                    .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
-
-            docs = merged;
+        } else if (hasFamille) {
+            docs = mongoRepository.findByFamilleIgnoreCase(filter.getFamille());
 
         } else if (hasUrgence) {
-            docs = mongoRepository.findByUrgenceIgnoreCase(filter.getUrgence());
+            docs = mongoRepository.findByThemesUrgenceIgnoreCase(filter.getUrgence());
 
         } else if (hasSearch) {
-            // union : prediction OU propositions
-            Set<String> ids = new LinkedHashSet<>();
-            List<MarketEventAnalysisDocument> merged = new ArrayList<>();
-
-            mongoRepository
-                    .findByPredictionContainingIgnoreCase(filter.getSearch())
-                    .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
-
-            mongoRepository
-                    .findByPropositionsContainingIgnoreCase(filter.getSearch())
-                    .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
-
-            docs = merged;
+            docs = mongoRepository.findBySearchIgnoreCase(filter.getSearch());
 
         } else {
             docs = mongoRepository.findAll();
@@ -77,16 +60,29 @@ public class MarketEventAnalysisRepositoryAdapter {
     private MarketEventAnalysis toDomain(MarketEventAnalysisDocument doc) {
         return MarketEventAnalysis.builder()
                 .id(doc.getId())
-                .sourceId(doc.getSourceId())
-                .theme(doc.getTheme())
-                .type(doc.getType())
+                .famille(doc.getFamille())
                 .genereLe(doc.getGenereLe())
-                .prediction(doc.getPrediction())
-                .propositions(doc.getPropositions())   // ← List<String>
-                .ton(doc.getTon())
-                .urgence(doc.getUrgence())
-                .categorie(doc.getCategorie())
+                .totalThemes(doc.getThemes() != null ? doc.getThemes().size() : 0)
+                .pageDB(doc.getPageDB())
+                .totalPagesDB(doc.getTotalPagesDB())
                 .analyseEl(doc.getAnalyseEl())
+                .themes(toThemeDomainList(doc.getThemes()))
                 .build();
+    }
+
+    private List<MarketEventAnalysis.Theme> toThemeDomainList(
+            List<MarketEventAnalysisDocument.ThemeDocument> themes) {
+        if (themes == null) return List.of();
+        return themes.stream()
+                .map(t -> MarketEventAnalysis.Theme.builder()
+                        .theme(t.getTheme())
+                        .prediction(t.getPrediction())
+                        .proposition(t.getProposition())
+                        .ton(t.getTon())
+                        .urgence(t.getUrgence())
+                        .categorie(t.getCategorie())
+                        .analyseEl(t.getAnalyseEl())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

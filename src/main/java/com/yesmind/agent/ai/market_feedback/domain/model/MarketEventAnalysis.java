@@ -11,14 +11,27 @@ import java.util.List;
 @AllArgsConstructor
 public class MarketEventAnalysis {
     private String id;
-    private String sourceId;
-    private String theme;
-    private String type;
+    private String famille;
     private LocalDateTime genereLe;
-    private String prediction;
-    private List<String> propositions;
-    private String ton;
-    private String urgence;
-    private String categorie;
+    private int totalThemes;
+    private int pageDB;
+    private int totalPagesDB;
     private LocalDateTime analyseEl;
+    private List<Theme> themes;
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Theme {
+        private String sourceId;
+        private String theme;
+        private String prediction;
+        private String proposition;
+        private String ton;
+        private String urgence;
+        private String categorie;
+        private LocalDateTime analyseEl;
+    }
 }

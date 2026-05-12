@@ -3,7 +3,11 @@ package com.yesmind.agent.ai.market_feedback.adapter.repository;
 import com.yesmind.agent.ai.market_feedback.domain.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.*;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +16,7 @@ import java.util.stream.Collectors;
 public class MarketEventSummaryRepositoryAdapter {
 
     private final MarketEventSummaryMongoRepository mongoRepository;
+    private final MongoTemplate mongoTemplate;  // ← ajout
 
     public PagedResult<MarketEventSummary> findAll(MarketEventSummaryFilter filter) {
 
@@ -21,20 +26,23 @@ public class MarketEventSummaryRepositoryAdapter {
                 Sort.by(Sort.Direction.DESC, "genere_le")
         );
 
-        boolean hasSearch = filter.getSearch() != null && !filter.getSearch().isBlank();
-
         Page<MarketEventSummaryDocument> page;
 
-        if (hasSearch) {
-            // cherche dans contenu_fr OU contenu_en OU theme
-            page = mongoRepository
-                    .findByContenuFrContainingIgnoreCaseOrContenuEnContainingIgnoreCaseOrThemeContainingIgnoreCase(
-                            filter.getSearch(),
-                            filter.getSearch(),
-                            filter.getSearch(),
-                            pageable);
+        if (StringUtils.hasText(filter.getSearch())) {
+            // recherche dans famille, themes[].theme, themes[].contenu_fr/en
+            Criteria criteria = new Criteria().orOperator(
+                    Criteria.where("famille").regex(filter.getSearch(), "i"),
+                    Criteria.where("themes.theme").regex(filter.getSearch(), "i"),
+                    Criteria.where("themes.contenu_fr").regex(filter.getSearch(), "i"),
+                    Criteria.where("themes.contenu_en").regex(filter.getSearch(), "i")
+            );
+            Query query = new Query(criteria).with(pageable);
+            List<MarketEventSummaryDocument> results =
+                    mongoTemplate.find(query, MarketEventSummaryDocument.class);
+            long total =
+                    mongoTemplate.count(new Query(criteria), MarketEventSummaryDocument.class);
+            page = new PageImpl<>(results, pageable, total);
         } else {
-            // aucun filtre → retourne tout
             page = mongoRepository.findAll(pageable);
         }
 
@@ -63,21 +71,28 @@ public class MarketEventSummaryRepositoryAdapter {
         return mongoRepository.count();
     }
 
-    public long countDistinctTypes() {
-        return mongoRepository.countDistinctTypes();
+    public long countDistinctFamilles() {
+        return mongoRepository.countDistinctFamilles();
     }
 
     private MarketEventSummary toDomain(MarketEventSummaryDocument doc) {
+        List<MarketEventSummary.ThemeSummary> themes = doc.getThemes() == null
+                ? List.of()
+                : doc.getThemes().stream()
+                .map(t -> MarketEventSummary.ThemeSummary.builder()
+                        .theme(t.getTheme())
+                        .contenuFr(t.getContenuFr())
+                        .contenuEn(t.getContenuEn())
+                        .build())
+                .collect(Collectors.toList());
+
         return MarketEventSummary.builder()
                 .id(doc.getId())
-                .theme(doc.getTheme())
-                .nombreArticles(doc.getNombreArticles())
+                .famille(doc.getFamille())
                 .genereLe(doc.getGenereLe())
-                .type(doc.getType())
-                .contenuFr(doc.getContenuFr())
-                .contenuEn(doc.getContenuEn())
                 .pageDB(doc.getPageDB())
                 .totalPagesDB(doc.getTotalPagesDB())
+                .themes(themes)
                 .build();
     }
 }

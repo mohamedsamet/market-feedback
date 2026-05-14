@@ -10,6 +10,7 @@ import lombok.*;
 public class MarketEventAnalysisFilter {
     private String search;
     private String urgence;
+    private String famille;
     private int page;
     private int size;
 }

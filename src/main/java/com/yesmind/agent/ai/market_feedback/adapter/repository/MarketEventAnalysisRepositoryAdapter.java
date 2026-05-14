@@ -14,45 +14,49 @@ public class MarketEventAnalysisRepositoryAdapter {
 
     public PagedResult<MarketEventAnalysis> findAll(MarketEventAnalysisFilter filter) {
 
-        boolean hasSearch  = filter.getSearch()  != null && !filter.getSearch().isBlank();
-        boolean hasUrgence = filter.getUrgence() != null && !filter.getUrgence().isBlank();
+        boolean hasSearch   = filter.getSearch()   != null && !filter.getSearch().isBlank();
+        boolean hasUrgence  = filter.getUrgence()  != null && !filter.getUrgence().isBlank();
+        boolean hasFamille  = filter.getFamille()  != null && !filter.getFamille().isBlank();
 
         List<MarketEventAnalysisDocument> docs;
 
         if (hasSearch && hasUrgence) {
-            // union : prediction OU propositions, filtrés par urgence
             Set<String> ids = new LinkedHashSet<>();
             List<MarketEventAnalysisDocument> merged = new ArrayList<>();
 
             mongoRepository
-                    .findByUrgenceIgnoreCaseAndPredictionContainingIgnoreCase(
+                    .findByThemesUrgenceAndThemesPredictionContainingIgnoreCase(
                             filter.getUrgence(), filter.getSearch())
                     .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
 
             mongoRepository
-                    .findByUrgenceAndPropositionsContainingIgnoreCase(
+                    .findByThemesUrgenceAndThemesPropositionsContainingIgnoreCase(
                             filter.getUrgence(), filter.getSearch())
                     .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
 
             docs = merged;
 
         } else if (hasUrgence) {
-            docs = mongoRepository.findByUrgenceIgnoreCase(filter.getUrgence());
+            docs = mongoRepository.findByThemesUrgenceIgnoreCase(filter.getUrgence());
 
         } else if (hasSearch) {
-            // union : prediction OU propositions
             Set<String> ids = new LinkedHashSet<>();
             List<MarketEventAnalysisDocument> merged = new ArrayList<>();
 
             mongoRepository
-                    .findByPredictionContainingIgnoreCase(filter.getSearch())
+                    .findByThemesPredictionContainingIgnoreCase(filter.getSearch())
                     .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
 
             mongoRepository
-                    .findByPropositionsContainingIgnoreCase(filter.getSearch())
+                    .findByThemesPropositionsContainingIgnoreCase(filter.getSearch())
                     .forEach(d -> { if (ids.add(d.getId())) merged.add(d); });
 
             docs = merged;
+
+        } else if (hasFamille) {
+            docs = mongoRepository.findByFamilleIgnoreCase(filter.getFamille());
+
+
 
         } else {
             docs = mongoRepository.findAll();
@@ -77,16 +81,31 @@ public class MarketEventAnalysisRepositoryAdapter {
     private MarketEventAnalysis toDomain(MarketEventAnalysisDocument doc) {
         return MarketEventAnalysis.builder()
                 .id(doc.getId())
-                .sourceId(doc.getSourceId())
-                .theme(doc.getTheme())
-                .type(doc.getType())
+                .famille(doc.getFamille())
                 .genereLe(doc.getGenereLe())
-                .prediction(doc.getPrediction())
-                .propositions(doc.getPropositions())   // ← List<String>
-                .ton(doc.getTon())
-                .urgence(doc.getUrgence())
-                .categorie(doc.getCategorie())
-                .analyseEl(doc.getAnalyseEl())
+                .totalThemes(doc.getTotalThemes())
+                .pageDB(doc.getPageDB())
+                .totalPagesDB(doc.getTotalPagesDB())
+                .analyseLe(doc.getAnalyseLe())
+                .themes(
+                        doc.getThemes() == null ? List.of() :
+                                doc.getThemes().stream()
+                                        .map(this::toThemeDomain)
+                                        .collect(Collectors.toList())
+                )
+                .build();
+    }
+
+    private MarketEventAnalysis.ThemeAnalysis toThemeDomain(
+            MarketEventAnalysisDocument.ThemeAnalysis t) {
+        return MarketEventAnalysis.ThemeAnalysis.builder()
+                .theme(t.getTheme())
+                .prediction(t.getPrediction())
+                .propositions(t.getPropositions())   // Map<String, String>
+                .ton(t.getTon())
+                .urgence(t.getUrgence())
+                .categorie(t.getCategorie())
+                .analyseLe(t.getAnalyseLe())
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.yesmind.agent.ai.market_feedback.business.core;
+package com.yesmind.agent.ai.market_feedback.port.core;
 
 import com.yesmind.agent.ai.market_feedback.adapter.repository.MarketEventAnalysisRepositoryAdapter;
 import com.yesmind.agent.ai.market_feedback.domain.model.MarketEventAnalysis;

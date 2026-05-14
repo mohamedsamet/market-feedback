@@ -20,11 +20,15 @@ public class CarouselController extends MainController {
     @GetMapping
     public ResponseEntity<List<MarketEventAnalysisDTO>> getCarousel(
             @RequestParam(defaultValue = "") String search,
-            @RequestParam(defaultValue = "") String sortUrgence
+            @RequestParam(defaultValue = "") String sortUrgence,
+            @RequestParam(defaultValue = "") String famille,
+            @RequestParam(defaultValue = "") String categorie,
+            @RequestParam(defaultValue = "") String ton
     ) {
         MarketEventAnalysisFilter filter = MarketEventAnalysisFilter.builder()
                 .search(search)
                 .urgence(sortUrgence.isBlank() ? null : sortUrgence)
+                .famille(famille.isBlank()   ? null : famille)
                 .page(0)
                 .size(1000)
                 .build();

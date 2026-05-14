@@ -11,16 +11,31 @@ public class MarketEventAnalysisMapper {
     public MarketEventAnalysisDTO toDTO(MarketEventAnalysis analysis) {
         return MarketEventAnalysisDTO.builder()
                 .id(analysis.getId())
-                .sourceId(analysis.getSourceId())
-                .theme(analysis.getTheme())
-                .type(analysis.getType())
+                .famille(analysis.getFamille())
                 .genereLe(analysis.getGenereLe())
-                .prediction(analysis.getPrediction())
-                .propositions(analysis.getPropositions())
-                .ton(analysis.getTon())
-                .urgence(analysis.getUrgence())
-                .categorie(analysis.getCategorie())
-                .analyseEl(analysis.getAnalyseEl())
+                .totalThemes(analysis.getTotalThemes())
+                .pageDB(analysis.getPageDB())
+                .totalPagesDB(analysis.getTotalPagesDB())
+                .analyseLe(analysis.getAnalyseLe())
+                .themes(
+                        analysis.getThemes() == null ? List.of() :
+                                analysis.getThemes().stream()
+                                        .map(this::toThemeDTO)
+                                        .collect(Collectors.toList())
+                )
+                .build();
+    }
+
+    private MarketEventAnalysisDTO.ThemeAnalysisDTO toThemeDTO(
+            MarketEventAnalysis.ThemeAnalysis theme) {
+        return MarketEventAnalysisDTO.ThemeAnalysisDTO.builder()
+                .theme(theme.getTheme())
+                .prediction(theme.getPrediction())
+                .propositions(theme.getPropositions())  // Map<String, String>
+                .ton(theme.getTon())
+                .urgence(theme.getUrgence())
+                .categorie(theme.getCategorie())
+                .analyseLe(theme.getAnalyseLe())
                 .build();
     }
 
